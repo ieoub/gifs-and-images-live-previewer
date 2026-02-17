@@ -81,6 +81,3 @@ A lightweight, pure HTML/CSS/JavaScript web app that lets you **browse, preview,
 > The app relies on the browser’s folder-selection capability, which may vary slightly between browsers.
 
 ---
-
-## 📦 Project Structure
-
