@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image gallery · all formats + filter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: #1b1b2c;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .card {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(20,20,35,0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid #3d3d66;
+            border-radius: 2rem;
+            padding: 2rem 1.8rem;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.7);
+        }
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-weight: 500;
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+            color: #e0e0ff;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+        h1 span {
+            background: #2d2d4a;
+            font-size: 0.9rem;
+            font-weight: 400;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            color: #c4c4ff;
+            border: 1px solid #5a5a9a;
+        }
+        .sub {
+            color: #b0b0d0;
+            margin-bottom: 2rem;
+            border-left: 3px solid #6a6ab0;
+            padding-left: 1rem;
+            font-size: 1rem;
+        }
+        .control-panel {
+            background: #151525;
+            border-radius: 3rem 3rem 2rem 2rem;
+            padding: 1.5rem 1.8rem;
+            border: 1px solid #3b3b60;
+            margin-bottom: 2rem;
+        }
+        .folder-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: center;
+        }
+        .folder-icon {
+            font-size: 1.6rem;
+            line-height: 1;
+            filter: drop-shadow(0 2px 4px black);
+        }
+        .path-input {
+            flex: 1 1 300px;
+            background: transparent;
+            border: none;
+            padding: 0.8rem 0.5rem;
+            color: #f0f0ff;
+            font-size: 1rem;
+            font-family: 'Fira Code', monospace;
+            outline: none;
+            border-bottom: 1px solid #4f4f7a;
+            transition: 0.15s;
+        }
+        .path-input:focus {
+            border-bottom-color: #b0b0ff;
+            color: white;
+        }
+        .path-input::placeholder {
+            color: #6a6a99;
+            font-style: italic;
+        }
+        .btn {
+            background: #313154;
+            border: none;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            border: 1px solid #5f5f96;
+            transition: all 0.2s;
+            box-shadow: 0 6px 14px #00000055;
+        }
+        .btn:hover {
+            background: #40406e;
+            border-color: #a0a0f0;
+            transform: scale(1.02);
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .filter-section {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1.5rem;
+            background: #1a1a30;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            border: 1px solid #41416b;
+        }
+        .filter-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #cfcfff;
+            font-weight: 400;
+        }
+        .filter-select {
+            background: #262642;
+            color: white;
+            border: 1px solid #6767b0;
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c0c0ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 0.8rem center;
+            background-size: 1rem;
+        }
+        .filter-select option {
+            background: #1e1e38;
+        }
+        .count-badge {
+            background: #2a2a50;
+            padding: 0.4rem 1.4rem;
+            border-radius: 30px;
+            font-weight: 500;
+            color: #d0d0ff;
+            border: 1px solid #6a6ab0;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+        .status-area {
+            margin: 1rem 0 1.5rem 0;
+            font-size: 0.95rem;
+            min-height: 2.2rem;
+            color: #c8c8f0;
+            background: #121222;
+            border-radius: 40px;
+            padding: 0.5rem 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            border: 1px solid #39395c;
+        }
+        .file-list-toggle {
+            background: none;
+            border: none;
+            color: #b1b1ff;
+            text-decoration: underline dotted;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1rem;
+            max-height: 55vh;
+            overflow-y: auto;
+            padding: 1rem 0.6rem;
+            border-radius: 28px;
+            background: #0d0d1a;
+            border: 1px solid #35355a;
+            transition: all 0.2s;
+        }
+        .image-card {
+            background: #1d1d33;
+            border-radius: 20px;
+            padding: 0.8rem 0.6rem 0.6rem 0.6rem;
+            box-shadow: 0 10px 18px #00000066;
+            border: 1px solid #4a4a7a;
+            transition: transform 0.15s;
+            display: flex;
+            flex-direction: column;
+        }
+        .image-card:hover {
+            transform: translateY(-5px);
+            border-color: #9494f0;
+            background: #262642;
+        }
+        .image-preview {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
+            background: #12121e;
+            border-radius: 16px;
+            border: 1px solid #4d4d82;
+        }
+        .image-name {
+            color: #dbdbff;
+            font-size: 0.7rem;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0.4rem 0.2rem 0 0.2rem;
+            max-width: 100%;
+            text-align: center;
+        }
+        .image-type-badge {
+            font-size: 0.6rem;
+            background: #2f2f55;
+            color: #bdbdff;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            align-self: center;
+            margin-top: 0.2rem;
+            border: 1px solid #6262a0;
+        }
+        .empty-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #9a9ac8;
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+        .footer-note {
+            margin-top: 1rem;
+            text-align: right;
+            font-size: 0.8rem;
+            color: #6b6ba0;
+        }
+        .image-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+        .image-grid::-webkit-scrollbar-track {
+            background: #1c1c30;
+            border-radius: 12px;
+        }
+        .image-grid::-webkit-scrollbar-thumb {
+            background: #50508a;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>
+        🖼️ IMAGE GALLERY · ALL FORMATS
+        <span>filter by type</span>
+    </h1>
+    <div class="sub">pick any folder → see PNG, JPG, JPEG, WEBP, SVG, GIF, BMP, TIFF ...</div>
+
+    <div class="control-panel">
+        <!-- folder selection row -->
+        <div class="folder-row">
+            <span class="folder-icon">📁</span>
+            <input type="text" id="folderPathInput" class="path-input" placeholder="e.g. D:\pics  or  C:\Users\name\Images" value="D:\images">
+            <button class="btn" id="loadBtn">
+                <span>🔍</span> load folder
+            </button>
+        </div>
+
+        <!-- filter bar -->
+        <div class="filter-section">
+            <span class="filter-label">🎚️ show:</span>
+            <select id="formatFilter" class="filter-select">
+                <option value="all">all image files</option>
+                <option value="png">PNG</option>
+                <option value="jpg">JPEG/JPG</option>
+                <option value="jpeg">JPEG (explicit)</option>
+                <option value="gif">GIF</option>
+                <option value="webp">WEBP</option>
+                <option value="svg">SVG</option>
+                <option value="bmp">BMP</option>
+                <option value="tiff">TIFF/TIF</option>
+                <option value="avif">AVIF</option>
+                <option value="ico">ICO</option>
+            </select>
+            <span class="count-badge" id="imageCountBadge">0 images</span>
+        </div>
+    </div>
+
+    <!-- status & file list toggle -->
+    <div class="status-area">
+        <span id="currentFolderDisplay">📂 (no folder)</span>
+        <button class="file-list-toggle" id="toggleFileListBtn" type="button">📋 show file names</button>
+        <span style="margin-left: auto; font-size:0.85rem; opacity:0.8;">ⓘ uses folder picker</span>
+    </div>
+
+    <!-- grid for images (filtered) -->
+    <div id="imageGrid" class="image-grid">
+        <div class="empty-message">⏳ pick a folder to load images</div>
+    </div>
+    <div class="footer-note">* all images load as previews • filter updates instantly</div>
+</div>
+
+<script>
+(function() {
+    // DOM elements
+    const folderInput = document.getElementById('folderPathInput');
+    const loadBtn = document.getElementById('loadBtn');
+    const formatFilter = document.getElementById('formatFilter');
+    const imageCountBadge = document.getElementById('imageCountBadge');
+    const currentFolderDisplay = document.getElementById('currentFolderDisplay');
+    const toggleFileListBtn = document.getElementById('toggleFileListBtn');
+    const imageGrid = document.getElementById('imageGrid');
+
+    // hidden directory picker
+    const hiddenDirInput = document.createElement('input');
+    hiddenDirInput.type = 'file';
+    hiddenDirInput.webkitdirectory = true;
+    hiddenDirInput.multiple = true;
+    hiddenDirInput.style.display = 'none';
+    document.body.appendChild(hiddenDirInput);
+
+    // State
+    let allImageFiles = [];               // all image File objects from last load
+    let currentFolderName = '';
+    let objectUrls = [];                  // for cleanup
+
+    // Supported image extensions (lowercase, no dot)
+    const SUPPORTED_EXT = new Set([
+        'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'tiff', 'tif', 'avif', 'ico'
+    ]);
+
+    // Helper: check if file is image by extension
+    function isImageFile(file) {
+        const name = file.name.toLowerCase();
+        const ext = name.split('.').pop();
+        return SUPPORTED_EXT.has(ext);
+    }
+
+    // Get filtered files based on select value
+    function getFilteredFiles() {
+        const filter = formatFilter.value;
+        if (filter === 'all') {
+            return allImageFiles;
+        }
+        // for jpg we want both .jpg and .jpeg? but filter value 'jpg' will also include jpeg? we'll make it flexible
+        if (filter === 'jpg') {
+            return allImageFiles.filter(f => {
+                const ext = f.name.toLowerCase().split('.').pop();
+                return ext === 'jpg' || ext === 'jpeg';
+            });
+        }
+        // tiff includes tif
+        if (filter === 'tiff') {
+            return allImageFiles.filter(f => {
+                const ext = f.name.toLowerCase().split('.').pop();
+                return ext === 'tiff' || ext === 'tif';
+            });
+        }
+        // default: exact extension match
+        return allImageFiles.filter(f => {
+            const ext = f.name.toLowerCase().split('.').pop();
+            return ext === filter;
+        });
+    }
+
+    // Render grid from filtered files
+    function renderGrid() {
+        // Clear grid
+        imageGrid.innerHTML = '';
+
+        const filtered = getFilteredFiles();
+        imageCountBadge.textContent = `${filtered.length} image${filtered.length !== 1 ? 's' : ''}`;
+
+        if (filtered.length === 0) {
+            imageGrid.innerHTML = `<div class="empty-message">✨ no images match the filter · ${allImageFiles.length} total image files in folder</div>`;
+            return;
+        }
+
+        // Create cards
+        filtered.forEach((file) => {
+            const card = document.createElement('div');
+            card.className = 'image-card';
+
+            const img = document.createElement('img');
+            img.className = 'image-preview';
+            const url = URL.createObjectURL(file);
+            img.src = url;
+            img.alt = file.name;
+            img.loading = 'lazy';
+
+            // store URL for cleanup later
+            objectUrls.push(url);
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'image-name';
+            nameSpan.textContent = file.name;
+
+            const typeSpan = document.createElement('span');
+            typeSpan.className = 'image-type-badge';
+            const ext = file.name.split('.').pop().toUpperCase();
+            typeSpan.textContent = ext;
+
+            card.appendChild(img);
+            card.appendChild(nameSpan);
+            card.appendChild(typeSpan);
+            imageGrid.appendChild(card);
+        });
+    }
+
+    // Cleanup old object URLs
+    function cleanupUrls() {
+        if (objectUrls.length) {
+            objectUrls.forEach(url => URL.revokeObjectURL(url));
+            objectUrls = [];
+        }
+    }
+
+    // Process files from directory picker
+    function processSelectedFiles(fileList) {
+        const files = Array.from(fileList);
+        
+        // Filter image files only (by extension)
+        allImageFiles = files.filter(isImageFile);
+
+        // Get folder name from first file's webkitRelativePath
+        if (files.length > 0 && files[0].webkitRelativePath) {
+            const parts = files[0].webkitRelativePath.split('/');
+            currentFolderName = parts[0] || 'selected folder';
+            folderInput.value = `📁 ${currentFolderName} (from picker)`;
+        } else {
+            currentFolderName = 'picked folder';
+            folderInput.value = '📁 folder loaded';
+        }
+
+        currentFolderDisplay.textContent = `📂 ${currentFolderName}`;
+        
+        // Clean old URLs then render
+        cleanupUrls();
+        renderGrid();
+    }
+
+    // Event: directory selected
+    hiddenDirInput.addEventListener('change', function(event) {
+        if (event.target.files.length > 0) {
+            processSelectedFiles(event.target.files);
+        }
+    });
+
+    // Load button triggers folder picker
+    loadBtn.addEventListener('click', function() {
+        hiddenDirInput.click();
+    });
+
+    // Filter change: re-render
+    formatFilter.addEventListener('change', function() {
+        if (allImageFiles.length > 0) {
+            renderGrid();
+        } else {
+            // if no images, just update badge
+            imageCountBadge.textContent = `0 images`;
+        }
+    });
+
+    // Show file list (simple alert with names)
+    toggleFileListBtn.addEventListener('click', function() {
+        const filtered = getFilteredFiles();
+        if (filtered.length === 0) {
+            alert('📄 No images match current filter.');
+            return;
+        }
+
+        const names = filtered.slice(0, 35).map(f => f.name).join('\n');
+        const remainder = filtered.length > 35 ? `\n... and ${filtered.length - 35} more` : '';
+        alert(`📄 ${filtered.length} image(s) in filter:\n${names}${remainder}`);
+    });
+
+    // Manual path input: show hint + trigger picker on Enter
+    folderInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            alert('📁 Direct path not supported — please click "load folder" and select a directory.');
+            hiddenDirInput.click();
+        }
+    });
+
+    // initial placeholder
+    folderInput.value = 'D:\\images  (click load & pick folder)';
+    imageCountBadge.textContent = '0 images';
+    currentFolderDisplay.textContent = '📂 (no folder)';
+
+    // Final safety: if user clicks load and cancels, nothing breaks.
+})();
+</script>
+</body>
+</html>
